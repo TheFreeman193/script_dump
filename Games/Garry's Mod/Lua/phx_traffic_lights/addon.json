@@ -1,0 +1,10 @@
+{
+"title" : "PhoeniX-Storms Traffic Lights",
+"type" : "model",
+"tags" : [ "realism", "roleplay" ],
+"ignore" :
+[
+"*.psd",
+"*.vcpro",
+"*.svn"]
+}
