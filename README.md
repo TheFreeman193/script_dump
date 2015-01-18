@@ -1,6 +1,6 @@
 # About
 ## What this is
-This is a collection of testing and experimental scripts.
+This is a collection of some of my testing and experimental scripts.
 
 ## Why it's here
 The files here are for educational purposes. __Not all of them work__, and some are simply examples.
