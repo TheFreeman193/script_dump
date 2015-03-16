@@ -1,0 +1,126 @@
+{{TOCRight}}
+==Introduction==
+SteamIDs and Steam Community IDs (64-bit IDs) are two forms of the same identity. In this tutorial, I will show you how to convert one into the other, and also how to do so in Lua, which cannot understand numbers less than -2,147,483,648 or more than 2,147,483,647 (Long integers/32-bit).
+
+
+==SteamID to Community ID==
+A SteamID operates in the form <code>STEAM_X:Y:Z</code>. Within an individual user's SteamID, <code>X</code> will always be ''0'', and <code>Y</code> will always be ''1''/''0'', so for this tutorial, we'll take a SteamID as in the form: <code>STEAM_0:X:Y</code>.
+
+To convert a SteamID to a Steam Community ID, you must use the following equation:<br />
+(where SteamID = <code>STEAM_0:X:Y</code>)
+
+<syntaxhighlight>CommunityID = (Y*2) + X + 76561197960265728</syntaxhighlight>
+
+This will give you the associated Community ID. Unfortunately however, this will not work in Lua due to its limitations with integers.
+
+===In Lua===
+In Lua, we can use a 'cheat' to convert the SteamID, without using numbers beyond Lua's capacity. Seeing as the number of accounts created will never reach a value where it affects the first numbers, we can ''assume'' their value, cutting them out of the equation:
+
+<syntaxhighlight>Temp = (Y*2) + X + 960265728
+
+//It is necessary to convert it to a string, else Lua will not handle it.
+CommunityID = "76561197" .. tostring(Temp)</syntaxhighlight>
+
+In the above example, we assumed the first 8 characters as permanent figures, which means we can now do such calculations within Lua.
+
+==Community ID to SteamID==
+Converting a Community ID back into a SteamID is a little more complex, but can still be done with relative ease.
+
+Firstly, perform the following calculation:
+
+<syntaxhighlight>Temp = CommunityID - 76561197960265728</syntaxhighlight>
+
+This is where the method varies from the opposite conversion. Depending on the CommunityID, the result will either be odd or even. Therefore, when we divide it by two, we will either get a whole number, or with a decimal (.5). Knowing whether the ID is odd or even will be critical later, so before we divide by 2, we will use the [http://wikipedia.org/wiki/Modulo_operation modulo] operator to return an integer of value ''1/0'', which we will store:
+
+<syntaxhighlight>//If the ID is odd, there will be a remainder of 1 when divided by 2.
+//(if it is even, the remainder will be 0)
+
+OddID = Temp % 2</syntaxhighlight>
+
+Now we can continue with the conversion. We are going to divide the Community ID by 2, but we do not need the .5 created if the ID is odd, so we will ''floor'' (round down) the value:
+
+<syntaxhighlight>Temp = math.floor(Temp/2)</syntaxhighlight>
+
+Now we have everything we need to construct the SteamID. Using the form <code>STEAM_0:X:Y</code>, we will first determine the value of X (1/0). If the Community ID was odd, <code>X</code> is going to be 1, and an even ID will result in <code>X</code> being ''0''. The floored value we took from the previous calculation will become the <code>Y</code> part of the ID, so the final form (using variables) will be <code>STEAM_0:OddID:Temp</code>. See below:
+
+<syntaxhighlight>SteamID = "STEAM_0:" .. tostring(OddID) .. ":" .. tostring(Temp)</syntaxhighlight>
+
+===In Lua===
+Once again, we have to 'cheat' in order for this to work inside Lua. We will perform the same steps as above, but eliminate the first 8 characters of the constant like before:
+
+<syntaxhighlight>//Remove first 8 chars, subtract constant (with first 8 chars also removed)
+Temp = string.sub(CommunityID, 9) - 960265728
+OddID = Temp % 2
+Temp = math.floor(Temp/2)
+
+SteamID = "STEAM_0:" .. tostring(OddID) .. ":" .. tostring(Temp)</syntaxhighlight>
+
+Using the above, we can now easily convert SteamIDs and Community IDs in both directions. I have created some useful functions below that will do the job for you.
+
+==Useful Functions==
+===SteamID To Community ID===
+<code>Usage: '''''SteamIDToCommunityID(String:SteamID)'''''</code>
+<syntaxhighlight>function SteamIDToCommunityID(SID)
+  if !SID then return false end
+  SID = tostring(SID):upper():Trim()
+  local x,y,z = unpack(string.Explode(":", SID) || {})
+  if !x || x != "STEAM_0" then return false end
+  if !y || #y != 1 then return false end
+  y = tonumber(y)
+  if !y then return false end
+  if !(y >= 0 && y < 2) then return false end
+  if !z || #z < 4 then return false end
+  local ID = (tonumber(z)*2) + tonumber(y) + 960265728
+  ID = "76561197" .. tostring(ID)
+  return ID
+end</syntaxhighlight>
+
+===Community ID To SteamID===
+<code>Usage: '''''CommunityIDToSteamID(String:CommunityID)'''''</code>
+<syntaxhighlight>function CommunityIDToSteamID(CID)
+  if !CID then return false end
+  CID = tostring(CID):Trim()
+  if #CID <= 9 then return false end
+  ID = tonumber(CID:sub(9))
+  if !ID then return false end
+  if ID < 960265728 then return false end
+  ID = ID - 960265728
+  local odd = ID%2
+  ID = math.floor(ID/2)
+  ID = "STEAM_0:"..tostring(odd)..":"..tostring(ID)
+  return ID
+end</syntaxhighlight>
+
+===Get Community ID Of Player===
+<b style="color:red">Note: This function requires the following functions to work:
+*SteamIDToCommunityID</b>
+<code>Usage: (where ply is the player object) '''''ply:CommunityID()'''''</code>
+<syntaxhighlight>local P = (FindMetaTable"Player"||_R.Player)
+function P:CommunityID()
+	return SteamIDToCommunityID(self:SteamID())
+end</syntaxhighlight>
+
+===Get Player By SteamID===
+<code>Usage: '''''player.GetBySteamID(String:SteamID)'''''</code>
+<syntaxhighlight>function player.GetBySteamID(ID)
+	if !ID || !tostring(ID) then return false end
+	ID = tostring(ID):upper():Trim()
+	if !(ID:Left(10) == "STEAM_0:0:" || 
+	ID:Left(10) == "STEAM_0:1:") then return false end
+	local pls = player.GetAll()
+	for k=1,#pls do
+		if pls[k]:SteamID() == ID then return pls[k] end
+	end
+	return false
+end</syntaxhighlight>
+
+===Get Player By CommunityID===
+<b style="color:red">Note: These functions require the following functions to work:
+*CommunityIDToSteamID
+*player.GetBySteamID</b>
+<code>Usage: '''''player.GetByCommunityID(String:CommunityID)'''''</code>
+<syntaxhighlight>function player.GetByCommunityID(ID)
+	local SID = CommunityIDToSteamID(ID)
+	if !SID then return false end 
+	return player.GetBySteamID(SID)
+end</syntaxhighlight>

@@ -1,0 +1,31 @@
+/*User:TheFreeman193/common.css*/
+table #toc {
+	background-color: #f9f9f9;
+	border: 1px solid #aaaaaa !important;
+	display: table !important;
+	padding: 0px 5px !important;
+	margin:20px 0 -10px -50px !important;
+}
+#toc ul {
+	list-style: none outside none;
+}
+#toc #toctitle, .toc #toctitle, #toc .toctitle, .toc .toctitle {
+	text-align: center;
+	margin: 0px 0px 0px 20px;
+}
+#toctitle h2 {
+    font-family: Arial Rounded MT Bold;
+    font-size: 14pt;
+    display: inline;
+	vertical-align: middle;
+}
+.tocnumber {
+	display:initial;
+}
+#toc li {
+	margin-bottom: 3px;
+}
+#toc li ul {
+	margin-top: 2px !important;
+}
+
