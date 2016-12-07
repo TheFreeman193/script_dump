@@ -1,29 +1,31 @@
 @echo off
-setlocal EnableDelayedExpansion
+setlocal DisableDelayedExpansion
 
-set repo=lemons
+for /f "delims=" %%G in ('git config --get remote.origin.url') do set _repo=%%G
 
-set tgt=TEMP_CHANGELOG
-set filter="~log"
+set _tgt=CHANGELOG.tmp
+set _filter="~log"
 
-set fmt="## Revision [%%h](http://github.com/TheFreeman193/%repo%/commit/%%H)%%n```%%n%%B```%%n"
-set fmt2="- [%%H](http://github.com/TheFreeman193/%repo%/commit/%%H) - %%f"
+set _fmt="### Revision [%%h](%_repo%/commit/%%H)%%n%%ci By [%%an](%%ae) (%%cr)%%n```%%n%%B%%n```%%n"
+set _fmt2="- %%cI [%%h](%_repo%/commit/%%H) - %%f"
 
-"%git_install_root%\cmd\git.exe" log --pretty=format:%fmt% --reverse --grep=%filter%>>%tgt%
-echo. >>%tgt%
-echo. >>%tgt%
-echo # Commit list>>%tgt%
-echo. >>%tgt%
+git log --pretty=format:%_fmt% --reverse --until=%DATE% >>%_tgt%
+REM git log --pretty=format:%_fmt% --reverse --grep=%_filter% --until=%DATE% >>%_tgt%
 
-"%git_install_root%\cmd\git.exe" log --pretty=format:%fmt2% --reverse --grep=%filter%>>%tgt%
+echo/>>%_tgt%
+echo/>>%_tgt%
+echo # Commit list>>%_tgt%
+echo/>>%_tgt%
 
-set outp=CHANGELOG.md
-echo # Changelog (Generated, Compound)>%outp%
-echo.>>%outp%
+git log --pretty=format:%_fmt2% --reverse --until=%DATE% >>%_tgt%
 
-for /f "eol=~ tokens=*" %%G in (%tgt%) do @echo.%%G>>%outp%
+set _outp=CHANGELOG.md
+echo # Changelog (Compound)>%_outp%
+echo #### Last Updated %DATE:~-4,4%/%DATE:~-7,2%/%DATE:~-10,2% %TIME:~0,-3% >>%_outp%
+echo/>>%_outp%
 
-del TEMP_CHANGELOG
+for /f "eol=~ tokens=*" %%G in (%_tgt%) do @echo/%%G>>%_outp%
 
-echo.Done.
-pause
+del %_tgt%
+
+echo Done.
