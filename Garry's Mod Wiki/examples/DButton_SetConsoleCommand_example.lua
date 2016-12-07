@@ -8,4 +8,3 @@ button:MakePopup()
 button:SetConsoleCommand( "say", LocalPlayer():Nick() )
 
 TESTP = button
-
