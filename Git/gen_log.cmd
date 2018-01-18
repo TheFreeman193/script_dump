@@ -8,15 +8,16 @@ set _filter="_IGNORE_IN_CHANGELOG_"
 
 REM set _fmt="### Revision [%%h](%_repo%/commit/%%H)%%n%%ci By [%%an](%%ae) (%%cr)%%n```%%n%%B%%n```%%n"
 set _fmt="### Revision [%%h](%_repo%/commit/%%H)%%n%%ci By [%%an](mailto:%%ae) (from [%%p](%_repo%/commit/%%P))%%n```%%n%%B%%n```%%n"
-set _fmt2="- %%cI [%%h](%_repo%/commit/%%H) - %%f"
+set _fmt2="| %%cI | `%%h` | [%%H](%_repo%/commit/%%H) | %%f"
 
-git log --pretty=format:%_fmt% --no-merges --reverse --grep=%_filter% --invert-grep >>%_tgt%
+git log --pretty=format:%_fmt% --no-merges --grep=%_filter% --invert-grep >>%_tgt%
 REM git log --pretty=format:%_fmt% --reverse --grep=%_filter% --until=%DATE% >>%_tgt%
 
 echo/>>%_tgt%
 echo/>>%_tgt%
 echo # Commit list>>%_tgt%
-echo/>>%_tgt%
+echo ^|Date^|Hash^|Full Hash^|Commit>>%_tgt%
+echo ^|-----:^|:---:^|:----------------^|:---------------->>%_tgt%
 
 git log --pretty=format:%_fmt2% --no-merges --reverse --grep=%_filter% --invert-grep >>%_tgt%
 
