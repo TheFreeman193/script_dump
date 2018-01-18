@@ -20,7 +20,7 @@ echo/>>%_tgt%
 
 git log --pretty=format:%_fmt2% --no-merges --reverse --grep=%_filter% --invert-grep >>%_tgt%
 
-set _outp=CHANGELOG.md
+set _outp=..\CHANGELOG.md
 echo # Changelog (Compound)>%_outp%
 echo #### Last Updated %DATE:~-4,4%/%DATE:~-7,2%/%DATE:~-10,2% %TIME:~0,-3% >>%_outp%
 echo/>>%_outp%
