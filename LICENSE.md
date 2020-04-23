@@ -1,6 +1,6 @@
 # MIT License
 
-## Copyright &copy; 2007-2020 Nicholas Bissell (_TheFreeman193_)
+## Copyright &copy; 2020 Nicholas Bissell (_TheFreeman193_)
 
 ---
 
